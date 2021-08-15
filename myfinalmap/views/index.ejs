@@ -1,0 +1,154 @@
+<!--using example of naver map api at first page-->
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no">
+    <title>E-world portal</title>
+    <link rel="stylesheet" href="/stylesheets/style.css"/>
+    <script type="text/javascript" src="https://openapi.map.naver.com/openapi/v3/maps.js?ncpClientId="></script>
+</head>
+<body>
+  <div id="navbar">E-world portal</div>
+  <div id="map" style="width:100%;height:100vh;"></div>
+  <div id="infoBox">
+    <div id="festival">오늘의 페스티벌</div>
+    <button type="button" onclick="location.href=`http://ip config using cmd.exe:port you set at app.js/showImg`">보러가기</button>
+  </div>
+  <script type="text/javascript" src="/public_data/data.js"></script>
+  <script type="text/javascript" src="/public_data/fantasy.js"></script>
+  <script>
+    var mapOptions = {
+        center: new naver.maps.LatLng(35.853446, 128.563882),
+        zoom: 18
+    };
+
+    var map = new naver.maps.Map('map', mapOptions);
+    
+    var fantasyMarkerList=[];
+    var fantasyInfowindowList= [];
+    var fantasyimgpathList = [];
+    var fantasyBaseId = "fantasy";
+    var parse=0;
+    var parsename = "";
+    var parsenameimg ="";
+    var parsenamesrc="";
+    for(var i in fantasydata){
+      var target = fantasydata[i];
+      parse = parseInt(i);
+      parsename = fantasyBaseId+parse;
+      parsenameimg = parsename+"img";
+      fantasyimgpathList.push("/images/fantasyImages/"+parsename+".jpg");
+      var tempimg = fantasyimgpathList[i];
+      parsenamesrc="/images/fantasy1.png";
+      var marker = new naver.maps.Marker({
+        map: map,
+        position: new naver.maps.LatLng(fantasydata[i].lat, fantasydata[i].lng),
+        icon:{
+          content: `<div id="'+parsename+'">
+            <img id="'+parsenameimg+'" src=${parsenamesrc}>
+            </div>
+          `,
+          anchor: new naver.maps.Point(12,12),
+        }
+      });
+      var contentinfo = `<div class='info_wrap'>
+            <p class='info_title'>${target.title}</p>
+            <p><img class=${parsenameimg} src=${tempimg} width='500' height='500'></p>
+            `;
+      var infoWindow = new naver.maps.InfoWindow({
+        content: contentinfo,
+        backgroundColor: "#00ff0000",
+        borderColor: "#00ff0000",
+      });
+      fantasyMarkerList.push(marker);
+      fantasyInfowindowList.push(infoWindow);
+      /* var marker = new naver.maps.Marker({
+        map:map,
+        position: fantasyPositions[i],
+        icon:{
+          content:"<div id='fantasy'>"+
+            "<img id='fantasyimg' src='/images/ex1.jpg' />"+
+            "</div>",
+          anchor: new naver.maps.Point(12,12),
+        }
+      }); */
+    }
+    for(var i=0,ii=fantasyMarkerList.length;i<ii;i++){
+      naver.maps.Event.addListener(fantasyMarkerList[i], "click", getClickHandler1(i, fantasyInfowindowList, fantasyMarkerList));
+    }
+    //data 배열 전용
+    var markerList=[];
+    var infoWindowList=[];
+    var dataimgpathList = [];
+    var dataBaseId = "data";
+    //for(var i in fantasyPositions){
+    for(var i in data){
+      var target=data[i];
+      parse = parseInt(i);
+      parsename = dataBaseId+parse;
+      parsenameimg = parsename+"img";
+      dataimgpathList.push("/images/dataImages/"+parsename+".jpg");
+      var tempimg = dataimgpathList[i];
+      var latlng=new naver.maps.LatLng(target.lat, target.lng);
+      marker = new naver.maps.Marker({
+        map: map,
+        position:latlng,
+        icon:{
+          content:"<div class='marker'></div>",
+          anchor:new naver.maps.Point(12,12),
+        },
+      });
+
+      var content=`<div class='infowindow_wrap'>
+        <div class='infowindow_title'>${target.title}</div>
+        <div class='infowindow_content'>${target.content}</div>
+        <p><img src=${tempimg} width='500' height='500'></p>
+      </div>`
+      
+      var infowindow = new naver.maps.InfoWindow({
+        content:content,
+        backgroundColor:"#00ff0000",
+        borderColor:"#00ff0000",
+        anchorSize: new naver.maps.Size(0,0),
+      });
+      markerList.push(marker);
+      infoWindowList.push(infowindow);
+    }
+
+    for(var i=0,ii=markerList.length;i<ii;i++){
+      naver.maps.Event.addListener(markerList[i], "click", getClickHandler(i));
+    }
+    
+    function getClickHandler(i){
+      return function(){
+        var marker=markerList[i];
+        var infowindow=infoWindowList[i];
+        if(infowindow.getMap()){//만약 지금 infowindow가 화면에 나타나있다면
+          infowindow.close();
+          panTo();
+        }else{
+          infowindow.open(map,marker);//현재 map위에 marker를 띄워준다.
+        }
+      }
+    }
+    function getClickHandler1(i, InfowindowList, MarkerList){
+      return function(){
+        var marker = MarkerList[i];
+        var infowindow = InfowindowList[i];
+        if(infowindow.getMap()){
+          infowindow.close();
+          panTo();
+        }else{
+          infowindow.open(map, marker);
+        }
+      }
+    }
+    function panTo(){
+      var moveLatLng = new naver.maps.LatLng(35.853446, 128.563882);
+      map.panTo(moveLatLng);
+    }
+  </script>
+</body>
+</html>
